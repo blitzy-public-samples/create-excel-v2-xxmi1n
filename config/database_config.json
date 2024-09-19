@@ -1,0 +1,74 @@
+{
+  "main_database": {
+    "type": "SQL Server",
+    "connection_string": "Server=excel-db-server.database.windows.net;Database=ExcelMainDB;User Id=${DB_USER};Password=${DB_PASSWORD};",
+    "max_connections": 100,
+    "min_connections": 5,
+    "connection_timeout_seconds": 30,
+    "command_timeout_seconds": 60,
+    "enable_connection_pooling": true,
+    "enable_retry_on_failure": true,
+    "max_retry_attempts": 3,
+    "retry_interval_seconds": 5
+  },
+  "read_replica": {
+    "enabled": true,
+    "connection_string": "Server=excel-db-replica.database.windows.net;Database=ExcelMainDB;User Id=${DB_RO_USER};Password=${DB_RO_PASSWORD};",
+    "max_connections": 50,
+    "min_connections": 2
+  },
+  "caching": {
+    "enabled": true,
+    "provider": "Redis",
+    "connection_string": "excel-cache.redis.cache.windows.net:6380,password=${REDIS_PASSWORD},ssl=True,abortConnect=False",
+    "default_expiration_minutes": 60
+  },
+  "migrations": {
+    "auto_migrate": false,
+    "migration_table_name": "DatabaseMigrationHistory",
+    "scripts_path": "/app/migrations"
+  },
+  "data_protection": {
+    "enable_transparent_data_encryption": true,
+    "enable_always_encrypted": false,
+    "data_masking_rules": [
+      {
+        "column": "Users.Email",
+        "masking_function": "Email"
+      },
+      {
+        "column": "Users.PhoneNumber",
+        "masking_function": "Default"
+      }
+    ]
+  },
+  "monitoring": {
+    "enable_query_store": true,
+    "enable_performance_insights": true,
+    "log_slow_queries": true,
+    "slow_query_threshold_ms": 1000
+  },
+  "backup": {
+    "enabled": true,
+    "type": "Full",
+    "frequency": "Daily",
+    "retention_days": 30,
+    "backup_window_start": "01:00",
+    "backup_window_end": "03:00",
+    "backup_storage_account": "excelbackupstorage"
+  },
+  "sharding": {
+    "enabled": false,
+    "shard_key": "TenantId",
+    "number_of_shards": 4,
+    "shard_map_manager_database_name": "ExcelShardMapManager"
+  },
+  "audit": {
+    "enabled": true,
+    "audit_table_name": "DatabaseAuditLogs",
+    "excluded_operations": [
+      "SELECT"
+    ],
+    "retention_days": 90
+  }
+}
